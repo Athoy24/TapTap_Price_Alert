@@ -1,0 +1,42 @@
+name: Taptap Send Rate Check
+
+on:
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  check-rate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to commit state.json back to the repository
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run exchange rate monitor
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SOURCE_CURRENCY: ${{ vars.SOURCE_CURRENCY }}
+          TARGET_COUNTRY: ${{ vars.TARGET_COUNTRY }}
+          TARGET_RATE_THRESHOLD: ${{ vars.TARGET_RATE_THRESHOLD }}
+          ALERT_COOLDOWN_HOURS: ${{ vars.ALERT_COOLDOWN_HOURS }}
+        run: python monitor.py --run-once
+
+      - name: Commit updated state.json
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update exchange rate state [skip ci]"
+          file_pattern: state.json
