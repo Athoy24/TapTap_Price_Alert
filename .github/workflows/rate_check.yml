@@ -2,8 +2,8 @@ name: Taptap Send Rate Check
 
 on:
   schedule:
-    # Run every 30 minutes
-    - cron: '*/30 * * * *'
+    # Run twice an hour (offset by 14 mins to avoid GitHub's heavy load delays at the top of the hour)
+    - cron: '14,44 * * * *'
   workflow_dispatch: # Allow manual triggers
 
 jobs:
