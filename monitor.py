@@ -76,6 +76,7 @@ def send_telegram_alert(rate, target_currency, previous_rate=None):
         logger.error("Telegram Bot Token or Chat ID is missing. Cannot send alert.")
         return False
 
+    chat_ids = [cid.strip() for cid in str(TELEGRAM_CHAT_ID).split(',')]
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     
     if previous_rate is not None:
@@ -96,20 +97,27 @@ def send_telegram_alert(rate, target_currency, previous_rate=None):
         f"**Country:** {TARGET_COUNTRY.capitalize()}\n\n"
         f"💸 [Send money now](https://www.taptapsend.com/)"
     )
-    payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
-        "parse_mode": "Markdown"
-    }
     
-    try:
-        response = requests.post(url, json=payload, timeout=10)
-        response.raise_for_status()
-        logger.info("Telegram alert sent successfully.")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to send Telegram alert: {e}")
-        return False
+    success_count = 0
+    for chat_id in chat_ids:
+        if not chat_id:
+            continue
+            
+        payload = {
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": "Markdown"
+        }
+        
+        try:
+            response = requests.post(url, json=payload, timeout=10)
+            response.raise_for_status()
+            logger.info(f"Telegram alert sent successfully to {chat_id}.")
+            success_count += 1
+        except Exception as e:
+            logger.error(f"Failed to send Telegram alert to {chat_id}: {e}")
+
+    return success_count > 0
 
 def check_rate_and_alert():
     logger.info(f"Checking Taptap Send exchange rate for {SOURCE_CURRENCY} to {TARGET_COUNTRY}...")
