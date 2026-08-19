@@ -24,6 +24,7 @@ def get_env_var(key, default):
     return val if val else default
 
 SOURCE_CURRENCY = get_env_var("SOURCE_CURRENCY", "GBP").upper()
+SOURCE_COUNTRY = get_env_var("SOURCE_COUNTRY", "").lower()
 TARGET_COUNTRY = get_env_var("TARGET_COUNTRY", "bangladesh").lower()
 TARGET_RATE_THRESHOLD = float(get_env_var("TARGET_RATE_THRESHOLD", "150.0"))
 CHECK_INTERVAL_SECONDS = int(get_env_var("CHECK_INTERVAL_SECONDS", "900"))
@@ -61,6 +62,10 @@ def fetch_taptap_rate():
         
         for country in data.get('availableCountries', []):
             if country.get('currency', '').upper() == SOURCE_CURRENCY:
+                # If a specific source country is provided (e.g. Germany), skip others
+                if SOURCE_COUNTRY and country.get('countryDisplayName', '').lower() != SOURCE_COUNTRY:
+                    continue
+                    
                 for corridor in country.get('corridors', []):
                     if corridor.get('countryDisplayName', '').lower() == TARGET_COUNTRY:
                         return float(corridor.get('fxRate')), corridor.get('currency')
