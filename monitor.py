@@ -16,12 +16,17 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Configuration
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-SOURCE_CURRENCY = os.getenv("SOURCE_CURRENCY", "GBP").upper()
-TARGET_COUNTRY = os.getenv("TARGET_COUNTRY", "bangladesh").lower()
-TARGET_RATE_THRESHOLD = float(os.getenv("TARGET_RATE_THRESHOLD", "150.0"))
-CHECK_INTERVAL_SECONDS = int(os.getenv("CHECK_INTERVAL_SECONDS", "900"))
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+
+def get_env_var(key, default):
+    val = os.getenv(key, "").strip()
+    return val if val else default
+
+SOURCE_CURRENCY = get_env_var("SOURCE_CURRENCY", "GBP").upper()
+TARGET_COUNTRY = get_env_var("TARGET_COUNTRY", "bangladesh").lower()
+TARGET_RATE_THRESHOLD = float(get_env_var("TARGET_RATE_THRESHOLD", "150.0"))
+CHECK_INTERVAL_SECONDS = int(get_env_var("CHECK_INTERVAL_SECONDS", "900"))
 
 STATE_FILE = "state.json"
 API_URL = "https://api.taptapsend.com/api/fxRates"

@@ -32,7 +32,6 @@ jobs:
           SOURCE_CURRENCY: ${{ vars.SOURCE_CURRENCY }}
           TARGET_COUNTRY: ${{ vars.TARGET_COUNTRY }}
           TARGET_RATE_THRESHOLD: ${{ vars.TARGET_RATE_THRESHOLD }}
-          ALERT_COOLDOWN_HOURS: ${{ vars.ALERT_COOLDOWN_HOURS }}
         run: python monitor.py --run-once
 
       - name: Commit updated state.json
